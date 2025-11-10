@@ -1,4 +1,3 @@
-# mortgage_main.py
 # Main program to run Assignment 2 Part A
 
 import pandas as pd
@@ -40,7 +39,8 @@ def run_mortgage():
     # === Assignment 2 additions ===
     schedules = calc.schedules(principal, years=term)
     monthly_term_balance = schedules["monthly"]["Ending Balance"].iloc[-1]
-    print(f"\nOutstanding balance after {term}-year term (monthly schedule): ${monthly_term_balance:,.2f}")
+    print(
+        f"\nOutstanding balance after {term}-year term (monthly schedule): ${monthly_term_balance:,.2f}")
 
     # one Excel with six worksheets
     out_xlsx = "Loan_Payment_Schedules.xlsx"

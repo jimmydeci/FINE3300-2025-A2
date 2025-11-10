@@ -30,7 +30,6 @@ def main():
     # Sort by month, then region, then item
     cpi = cpi.sort_values(
         by=["Month", "Jurisdiction", "Item"]).reset_index(drop=True)
-    # Show a preview matching the handout style (Canada, Jan-24)
 
     # 2) Print the first 12 lines
     preview = preview_first_n(cpi, 12)
@@ -62,8 +61,10 @@ def main():
     real_rank = real_min_wage_rank(min_wages, cpi)
 
     print("\nQ6) Minimum wage analysis (nominal & real):")
-    print(f"  Nominal minimum wage (highest): {nominal_hi['Jurisdiction']} - ${nominal_hi['Wage']:.2f}")
-    print(f"  Nominal minimum wage (lowest): {nominal_lo['Jurisdiction']} - ${nominal_lo['Wage']:.2f}")
+    print(
+        f"  Nominal minimum wage (highest): {nominal_hi['Jurisdiction']} - ${nominal_hi['Wage']:.2f}")
+    print(
+        f"  Nominal minimum wage (lowest): {nominal_lo['Jurisdiction']} - ${nominal_lo['Wage']:.2f}")
 
     # Print top 5 REAL (CPI-adjusted) for context
     print("\n  Top 5 by REAL minimum wage (nominal/CPI-adjusted):")

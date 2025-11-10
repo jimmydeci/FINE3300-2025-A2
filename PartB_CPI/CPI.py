@@ -16,7 +16,7 @@ PROV_MAP = {
     "PEI": "Prince Edward Island", "QC": "Quebec", "SK": "Saskatchewan", "Canada": "Canada"
 }
 
-# Regex to capture month columns whether "Jan-24" or "24-Jan"
+# Capture month columns whether "Jan-24" or "24-Jan"
 MONTH_COL_RE = re.compile(
     r"^(?:"
     r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)-\d{2}"      # Jan-24

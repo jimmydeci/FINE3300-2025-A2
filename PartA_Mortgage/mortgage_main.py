@@ -23,11 +23,10 @@ def run_mortgage():
     print("\n--- Mortgage Payments ---")
     principal = float(input("Enter the principal amount: "))
     rate = float(input("Enter the quoted annual interest rate (%): "))
-    years = int(input("Enter the amortization period (in years): "))
-    # prompt only; not used in math
+    amort_years = int(input("Enter the amortization period (in years): "))
     term = int(input("Enter the mortgage term (in years): "))
 
-    calc = MortgagePayment(rate, years)
+    calc = MortgagePayment(rate, amort_years, term)
     payments = calc.payments(principal)
 
     print("\n--- Mortgage Payment Results ---")
@@ -39,7 +38,9 @@ def run_mortgage():
     print(f"Rapid Weekly Payment: ${payments[5]:.2f}")
 
     # === Assignment 2 additions ===
-    schedules = calc.schedules(principal)
+    schedules = calc.schedules(principal, years=term)
+    monthly_term_balance = schedules["monthly"]["Ending Balance"].iloc[-1]
+    print(f"\nOutstanding balance after {term}-year term (monthly schedule): ${monthly_term_balance:,.2f}")
 
     # one Excel with six worksheets
     out_xlsx = "Loan_Payment_Schedules.xlsx"

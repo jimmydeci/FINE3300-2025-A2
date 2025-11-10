@@ -7,7 +7,8 @@ import pandas as pd
 from CPI import (
     load_all_cpi, preview_first_n, avg_mom_table, highest_avg_mom_province,
     equivalent_salary_table, load_min_wages, nominal_min_wage_hi_lo,
-    real_min_wage_rank, services_annual_change, highest_services_inflation
+    real_min_wage_rank, services_annual_change, highest_services_inflation,
+    MONTHS_12
 )
 
 
@@ -27,9 +28,12 @@ def main():
     cpi = load_all_cpi(args.data_dir)
 
     # 1) Combine the 11 data frames into one long-form df
-    # Sort by month, then region, then item
+    # Sort months chronologically using the predefined Jan→Dec ordering
+    cpi["Month"] = pd.Categorical(
+        cpi["Month"], categories=MONTHS_12, ordered=True)
     cpi = cpi.sort_values(
         by=["Month", "Jurisdiction", "Item"]).reset_index(drop=True)
+    cpi["Month"] = cpi["Month"].astype(str)
 
     # 2) Print the first 12 lines
     preview = preview_first_n(cpi, 12)
@@ -62,23 +66,21 @@ def main():
 
     print("\nQ6) Minimum wage analysis (nominal & real):")
     print(
-        f"  Nominal minimum wage (highest): {nominal_hi['Jurisdiction']} - ${nominal_hi['Wage']:.2f}")
+        f"  Nominal minimum wage (highest): {nominal_hi['Jurisdiction']} - "
+        f"${float(nominal_hi['Wage']):.2f}")
     print(
-        f"  Nominal minimum wage (lowest): {nominal_lo['Jurisdiction']} - ${nominal_lo['Wage']:.2f}")
-
-    # Print top 5 REAL (CPI-adjusted) for context
-    print("\n  Top 5 by REAL minimum wage (nominal/CPI-adjusted):")
-    print(real_rank.head(5).to_string(index=False))
+        f"  Nominal minimum wage (lowest): {nominal_lo['Jurisdiction']} - "
+        f"${float(nominal_lo['Wage']):.2f}")
 
     # Explicit single answer the question asks for: highest REAL
     highest_real = real_rank.iloc[0]  # real_rank is sorted desc by real index
     print("\n  Province with highest REAL minimum wage (Dec-24 CPI adjusted):")
-    print({
-        "Jurisdiction": highest_real["Jurisdiction"],
-        "Nominal Wage": highest_real["Wage"],
-        "Dec_AllItems_CPI": highest_real["Dec_AllItems_CPI"],
-        "Real Index": round(highest_real["RealWage_IndexAdj"], 4)
-    })
+    print(
+        f"  {highest_real['Jurisdiction']} | "
+        f"Nominal ${float(highest_real['Wage']):.2f} | "
+        f"Dec CPI {float(highest_real['Dec_AllItems_CPI']):.1f} | "
+        f"Real index {float(highest_real['RealWage_IndexAdj']):.4f}"
+    )
 
     # 7) Annual change in Services CPI (Jan→Dec)
     svc_tbl = services_annual_change(cpi)

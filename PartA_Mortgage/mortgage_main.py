@@ -37,22 +37,28 @@ def run_mortgage():
     print(f"Rapid Weekly Payment: ${payments[5]:.2f}")
 
     # === Assignment 2 additions ===
-    schedules = calc.schedules(principal, years=term)
-    monthly_term_balance = schedules["monthly"]["Ending Balance"].iloc[-1]
+    term_schedules = calc.schedules(principal, years=term)
+    monthly_term_balance = term_schedules["monthly"]["Ending Balance"].iloc[-1]
     print(
         f"\nOutstanding balance after {term}-year term (monthly schedule): ${monthly_term_balance:,.2f}")
+
+    # Full amortization schedules so balances reach zero in Excel/plot
+    full_schedules = calc.schedules(principal, years=amort_years)
 
     # one Excel with six worksheets
     out_xlsx = "Loan_Payment_Schedules.xlsx"
     keep = ["Period", "Starting Balance",
             "Interest", "Payment", "Ending Balance"]
     with pd.ExcelWriter(out_xlsx, engine="xlsxwriter") as w:
-        for name, df in schedules.items():
+        for name, df in full_schedules.items():
             df[keep].to_excel(w, sheet_name=name.title()[:31], index=False)
+        for name, df in term_schedules.items():
+            sheet = f"{name.title()} Term"[:31]
+            df[keep].to_excel(w, sheet_name=sheet, index=False)
 
     # one PNG with all 6 curves
     out_png = "Loan_Balance_Decline.png"
-    plot_balances(schedules, out_png)
+    plot_balances(full_schedules, out_png)
 
     print(f"\nSaved: {out_xlsx}")
     print(f"Saved: {out_png}")

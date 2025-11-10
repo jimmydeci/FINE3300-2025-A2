@@ -63,45 +63,70 @@ class MortgagePayment:
         )
 
     # === Added for Assignment 2 ===
-    def _schedule(self, principal: float, payments_per_year: int, payment_amount: float, years_limit: int):
+    def _schedule(self, principal: float, payments_per_year: int, payment_amount: float,
+                  years_limit: int, complete_amortization: bool):
         """Build a DataFrame with Period, Starting Balance, Interest, Payment, Ending Balance."""
         import pandas as pd
         i = self._periodic_rate(payments_per_year)
         limit_years = max(1, min(years_limit, self.amort_years))
         nmax = limit_years * payments_per_year
         bal = float(principal)
-        out, k = [], 0
-        while bal > 1e-6 and k < nmax + 2:
-            k += 1
-            start = bal
-            interest = start * i
-            principal_comp = payment_amount - interest
-            if principal_comp > start:
-                principal_comp = start
-                pay_eff = interest + principal_comp
-            else:
-                pay_eff = payment_amount
-            bal = start - principal_comp
+        out = []
+
+        def _append_row(k_idx: int, start_bal: float, int_amt: float,
+                        pay_amt: float, end_bal: float):
             out.append({
-                "Period": k,
-                "Starting Balance": round(start, 2),
-                "Interest": round(interest, 2),
-                "Payment": round(pay_eff, 2),
-                "Ending Balance": round(bal, 2)
+                "Period": k_idx,
+                "Starting Balance": round(start_bal, 2),
+                "Interest": round(int_amt, 2),
+                "Payment": round(pay_amt, 2),
+                "Ending Balance": round(end_bal, 2)
             })
+
+        if complete_amortization:
+            k = 0
+            # Continue until balance cleared; guard with safety cap to avoid infinite loops.
+            safety_cap = nmax + payments_per_year * 2
+            while bal > 1e-6 and k < safety_cap:
+                k += 1
+                start = bal
+                interest = start * i
+                principal_comp = payment_amount - interest
+                if principal_comp > start:
+                    principal_comp = start
+                    pay_eff = interest + principal_comp
+                else:
+                    pay_eff = payment_amount
+                bal = start - principal_comp
+                _append_row(k, start, interest, pay_eff, bal)
+        else:
+            for k in range(1, nmax + 1):
+                start = bal
+                interest = start * i
+                principal_comp = payment_amount - interest
+                pay_eff = payment_amount
+                if principal_comp > start:
+                    principal_comp = start
+                    pay_eff = interest + principal_comp
+                bal = start - principal_comp
+                _append_row(k, start, interest, pay_eff, bal)
+                if bal <= 1e-6:
+                    break
+
         return pd.DataFrame(out)
 
     def schedules(self, principal: float, years: int | None = None):
         """Return six DataFrames (one per payment option)."""
         years_limit = years if years is not None else self.term_years
         years_limit = max(1, min(years_limit, self.amort_years))
+        complete = years_limit == self.amort_years
         monthly, semi_monthly, bi_weekly, weekly, accel_bi_weekly, accel_weekly = self.payments(
             principal)
         return {
-            "monthly":               self._schedule(principal, 12, monthly, years_limit),
-            "semi-monthly":          self._schedule(principal, 24, semi_monthly, years_limit),
-            "bi-weekly":             self._schedule(principal, 26, bi_weekly, years_limit),
-            "weekly":                self._schedule(principal, 52, weekly, years_limit),
-            "accelerated bi-weekly": self._schedule(principal, 26, accel_bi_weekly, years_limit),
-            "accelerated weekly":    self._schedule(principal, 52, accel_weekly, years_limit)
+            "monthly":               self._schedule(principal, 12, monthly, years_limit, complete),
+            "semi-monthly":          self._schedule(principal, 24, semi_monthly, years_limit, complete),
+            "bi-weekly":             self._schedule(principal, 26, bi_weekly, years_limit, complete),
+            "weekly":                self._schedule(principal, 52, weekly, years_limit, complete),
+            "accelerated bi-weekly": self._schedule(principal, 26, accel_bi_weekly, years_limit, complete),
+            "accelerated weekly":    self._schedule(principal, 52, accel_weekly, years_limit, complete)
         }

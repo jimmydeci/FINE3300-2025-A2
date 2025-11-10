@@ -1,5 +1,5 @@
 # Part_B_CPI/CPI.py
-# Logic utilities for Part B (CPI). No plotting; just read/transform/analyze.
+# Computations for Part B (CPI)
 
 from __future__ import annotations
 import os

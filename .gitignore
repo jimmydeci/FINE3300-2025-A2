@@ -1,4 +1,6 @@
 __pycache__/
-*.pyc
-.vscode/
-.DS_Store
+.venv/
+outputs/
+*.xlsx
+*.png
+*.pdf

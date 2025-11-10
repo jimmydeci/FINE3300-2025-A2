@@ -1,4 +1,3 @@
-# mortgage.py
 # Part 1: MortgagePayment class
 # This module defines a class that computes Canadian mortgage payments
 # for monthly, semi-monthly, bi-weekly, weekly, and accelerated payment schedules
